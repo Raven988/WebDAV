@@ -5,11 +5,14 @@ import subprocess  # noqa: S404
 import sys
 
 from WebDavModel import WebDavModel
+from typing import Any
 
-from PyQt5.QtCore import QProcess, QTimer, QUrl, QDir
+from PyQt5.QtCore import QProcess, QTimer, QUrl
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout, \
     QApplication, QTreeView, QBoxLayout, QWidget, QLayout, QLayoutItem, QLineEdit, QFileSystemModel, QAbstractItemView
+
+from JsonFilesFilterProxyModel import JsonFilesFilterProxyModel
 
 
 def to_layout(layout_cls, widgets: list, spacing: int = 10, parent=None):
@@ -39,12 +42,13 @@ class UiReportDialog:
         self.title = QLabel(parent)
         self.title.setWordWrap(True)
 
-        self.open_file_btn = QPushButton('Открыть', parent)
-        self.open_dir_btn = QPushButton('Показать в папке', parent)
-        self.line_edit = QLineEdit()
+        self.open_file_btn: Any = QPushButton('Открыть', parent)
+        self.open_dir_btn: Any = QPushButton('Показать в папке', parent)
+        self.line_edit: Any = QLineEdit()
         self.tree_view = QTreeView()
         self.tree_view.setSortingEnabled(True)
         self.tree_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tree_view.setAnimated(True)
         self.type_file_browser()
 
         self.btn_layout = to_layout(
@@ -66,19 +70,24 @@ class UiReportDialog:
             ],
         )
         self.main_layout.setContentsMargins(16, 15, 16, 10)
+        self.main_layout.setSpacing(5)
         parent.setLayout(self.main_layout)
 
         self.line_edit.textChanged.connect(self.type_file_browser)
 
-    def type_file_browser(self, path: str = ''):
+    def type_file_browser(self, path: str = '.'):
+        path = '.' if path == '' else path
+
         if path.lower().startswith('wd://'):
             model = WebDavModel(path[4:])
             self.tree_view.setModel(model)
         else:
             model = QFileSystemModel()
-            model.setRootPath((QDir.rootPath()))
-            self.tree_view.setModel(model)
-            self.tree_view.setRootIndex(model.index(path))
+            model.setRootPath(path)
+            proxy_model = JsonFilesFilterProxyModel()
+            proxy_model.setSourceModel(model)
+            self.tree_view.setModel(proxy_model)
+            self.tree_view.setRootIndex(proxy_model.mapFromSource(model.index(path)))
 
 
 class ReportDialog(QDialog):
@@ -91,6 +100,7 @@ class ReportDialog(QDialog):
 
         self.setWindowTitle('Результат')
         self.ui = UiReportDialog(self)
+        self.setMinimumSize(700, 500)
 
         self.ui.open_file_btn.clicked.connect(self.open_file)
         self.ui.open_dir_btn.clicked.connect(self.open_dir)
