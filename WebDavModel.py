@@ -18,20 +18,16 @@ class WebDavModel(QStandardItemModel):
     def get_data_from_web_dav(self, remote_path=None, parent_item=None):
         if parent_item is None:
             parent_item = self.parent_item
-
         try:
             contents = self.client.list(remote_path)
             for row, item in enumerate(contents):
                 if item.endswith('/'):
                     child_item = QStandardItem(QApplication.style().standardIcon(QStyle.SP_DirIcon), f"{item[:-1]}")
                     parent_item.appendRow(child_item)
-                    if remote_path.endswith('/'):
-                        path = remote_path + item
-                    else:
-                        path = remote_path + '/' + item
-                    self.get_data_from_web_dav(path, child_item)
+                    new_path = remote_path + item
+                    self.get_data_from_web_dav(new_path, child_item)
                 elif item.endswith('.json'):
-                    child_item = QStandardItem(QIcon('json.png'), f"{item}")
+                    child_item = QStandardItem(QIcon('json.png'), f"{remote_path+item}")
                     parent_item.appendRow(child_item)
 
         except WebDavException as e:
