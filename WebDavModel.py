@@ -1,3 +1,4 @@
+from PyQt5.QtCore import QModelIndex
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
 from PyQt5.QtWidgets import QStyle, QApplication
 from webdav3.client import Client
@@ -27,8 +28,15 @@ class WebDavModel(QStandardItemModel):
                     new_path = remote_path + item
                     self.get_data_from_web_dav(new_path, child_item)
                 elif item.endswith('.json'):
-                    child_item = QStandardItem(QIcon('json.png'), f"{remote_path+item}")
+                    child_item = QStandardItem(QIcon('json.png'), f"{item}")
                     parent_item.appendRow(child_item)
 
         except WebDavException as e:
             self.parent_item.appendRow(QStandardItem(f'{e}'))
+
+    def filePath(self, index: QModelIndex):
+        if not index.isValid():
+            return 'wd//'
+
+        data_path = index.data()
+        return f'{self.filePath(index.parent())}{data_path}/'

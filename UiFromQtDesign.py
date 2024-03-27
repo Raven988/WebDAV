@@ -12,44 +12,50 @@ class MainWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         uic.loadUi('untitled.ui', self)
-        self.model = None
-        self.proxy_model = None
-        self.flag = False
+        self.model = QFileSystemModel()
+        self.model.setRootPath('.')
+        self.proxy_model = JsonFilesFilterProxyModel()
+        self.proxy_model.setSourceModel(self.model)
+        self.web_dav_model: WebDavModel = None
+        self.treeView.setModel(self.proxy_model)
+        self.treeView.setRootIndex(self.proxy_model.mapFromSource(self.model.index('.')))
 
-        self.type_file_browser()
         self.lineEdit.textChanged.connect(self.type_file_browser)
         self.treeView.doubleClicked.connect(self.open_queue_ui)
         self.pushButton.clicked.connect(self.close_queue_ui)
 
+        self.queue_is_open = False
         self.temp_list_files = []
 
-    def open_queue_ui(self, file: QModelIndex):
+    def open_queue_ui(self, file_index: QModelIndex):
         self.listWidget.clear()
 
-        if isinstance(self.model, QFileSystemModel):
-            current_index = self.proxy_model.mapToSource(file)
+        if not self.lineEdit.text().startswith('wd://'):
+            current_index = self.proxy_model.mapToSource(file_index)
             file_path = self.model.filePath(current_index)
             if file_path.endswith('.json') and file_path not in self.temp_list_files:
                 self.temp_list_files.append(file_path)
-                if not self.flag:
+                if not self.queue_is_open:
                     self.start_open_animation()
-                self.flag = True
+                self.queue_is_open = True
         else:
-            file_path = 'wd/' + file.data()
-            if file_path.endswith('.json') and file_path not in self.temp_list_files:
-                self.temp_list_files.append(file_path)
-                if not self.flag:
+            if file_index.data().endswith('.json'):
+                file_path = self.web_dav_model.filePath(file_index)
+                if file_path not in self.temp_list_files:
+                    self.temp_list_files.append(file_path[:-1])
+                if not self.queue_is_open:
                     self.start_open_animation()
-                self.flag = True
+                self.queue_is_open = True
 
         for i in self.temp_list_files:
             self.listWidget.addItem(i.split('/')[-1])
+
 
     def close_queue_ui(self):
         self.start_open_animation(450, 700, 250, 0)
         self.listWidget.clear()
         self.temp_list_files.clear()
-        self.flag = False
+        self.queue_is_open = False
 
     def start_open_animation(self, width_fb_start=700, width_fb_end=450, width_queue_start=0, width_queue_end=250):
         """Анимированное открытие фрейма."""
@@ -74,13 +80,9 @@ class MainWindow(QDialog):
         path = '.' if path == '' else path
 
         if path.lower().startswith('wd://'):
-            self.model = WebDavModel(path[4:])
-            self.treeView.setModel(self.model)
+            self.web_dav_model = WebDavModel(path[4:])
+            self.treeView.setModel(self.web_dav_model)
         else:
-            self.model = QFileSystemModel()
-            self.model.setRootPath(path)
-            self.proxy_model = JsonFilesFilterProxyModel()
-            self.proxy_model.setSourceModel(self.model)
             self.treeView.setModel(self.proxy_model)
             self.treeView.setRootIndex(self.proxy_model.mapFromSource(self.model.index(path)))
 
