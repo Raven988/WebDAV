@@ -19,7 +19,7 @@ class WebDavModel(QStandardItemModel):
         if parent_item is None:
             parent_item = self.parent_item
         try:
-            contents = self.client.list(remote_path)
+            contents = self.client.list(remote_path)  # TODO: Иногда приходит путь типа '/dir1' без '/' в конце в следствии непраильное отображение в дереве
             for row, item in enumerate(contents):
                 if item.endswith('/'):
                     child_item = QStandardItem(QApplication.style().standardIcon(QStyle.SP_DirIcon), f"{item[:-1]}")
