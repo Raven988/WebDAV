@@ -16,7 +16,7 @@ class MainWindow(QDialog):
         self.model.setRootPath('.')
         self.proxy_model = JsonFilesFilterProxyModel()
         self.proxy_model.setSourceModel(self.model)
-        self.web_dav_model: WebDavModel = None
+        self.web_dav_model: WebDavModel = WebDavModel()
         self.treeView.setModel(self.proxy_model)
         self.treeView.setRootIndex(self.proxy_model.mapFromSource(self.model.index('.')))
 
@@ -40,9 +40,9 @@ class MainWindow(QDialog):
                 self.queue_is_open = True
         else:
             if file_index.data().endswith('.json'):
-                file_path = self.web_dav_model.filePath(file_index)
+                file_path = self.lineEdit.text() + self.web_dav_model.filePath(file_index)[:-1]
                 if file_path not in self.temp_list_files:
-                    self.temp_list_files.append(file_path[:-1])
+                    self.temp_list_files.append(file_path)
                 if not self.queue_is_open:
                     self.start_open_animation()
                 self.queue_is_open = True
@@ -80,7 +80,8 @@ class MainWindow(QDialog):
         path = '.' if path == '' else path
 
         if path.lower().startswith('wd://'):
-            self.web_dav_model = WebDavModel(path[4:])
+            self.web_dav_model.clear()
+            self.web_dav_model.get_data_from_web_dav(path[4:])
             self.treeView.setModel(self.web_dav_model)
         else:
             self.treeView.setModel(self.proxy_model)

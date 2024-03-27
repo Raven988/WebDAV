@@ -8,13 +8,12 @@ from conf import options
 
 
 class WebDavModel(QStandardItemModel):
-    def __init__(self, path, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setHorizontalHeaderLabels(['Name'])
         self.parent_item = self.invisibleRootItem()
 
         self.client = Client(options)
-        self.get_data_from_web_dav(path)
 
     def get_data_from_web_dav(self, remote_path=None, parent_item=None):
         if parent_item is None:
@@ -36,7 +35,10 @@ class WebDavModel(QStandardItemModel):
 
     def filePath(self, index: QModelIndex):
         if not index.isValid():
-            return 'wd//'
+            return ''
 
         data_path = index.data()
         return f'{self.filePath(index.parent())}{data_path}/'
+
+    def clear(self):
+        self.removeRows(0, self.rowCount())
