@@ -48,17 +48,17 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QLineEdit" name="lineEdit"/>
+    <widget class="QLineEdit" name="line_edit"/>
    </item>
    <item>
-    <widget class="QFrame" name="frame">
+    <widget class="QFrame" name="main_frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QFrame" name="frame_2">
+     <widget class="QFrame" name="list_frame">
       <property name="geometry">
        <rect>
         <x>700</x>
@@ -96,10 +96,10 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QListWidget" name="listWidget"/>
+        <widget class="QListWidget" name="list_widget"/>
        </item>
        <item>
-        <widget class="QFrame" name="frame_3">
+        <widget class="QFrame" name="button_frame">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -123,14 +123,14 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="pushButton_2">
+           <widget class="QPushButton" name="convert_button">
             <property name="text">
              <string>Преобразовать</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="close_button">
             <property name="text">
              <string>Очистить</string>
             </property>
@@ -141,7 +141,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QFrame" name="frame_4">
+     <widget class="QFrame" name="tree_view_frame">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -173,7 +173,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QTreeView" name="treeView">
+        <widget class="QTreeView" name="tree_view">
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
@@ -205,7 +205,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <widget class="QDialogButtonBox" name="button_box">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -219,7 +219,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>button_box</sender>
    <signal>accepted()</signal>
    <receiver>Dialog</receiver>
    <slot>accept()</slot>
@@ -235,7 +235,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>button_box</sender>
    <signal>rejected()</signal>
    <receiver>Dialog</receiver>
    <slot>reject()</slot>
